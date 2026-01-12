@@ -5,57 +5,59 @@
     <title>Точки интереса</title>
     <link rel="stylesheet" href="/style/style.css" />
   </head>
-  <body>
-    <section class="1"><h1>Точки интереса</h1></section>
-    <section class="2">
-      <form id="formInterest">
-        <div class="form-example">
-          <label for="name">Название точки: </label>
-          <input type="text" name="name" id="name" required />
-        </div>
-        <div class="form-example">
-          <label for="adress">Адрес точки: </label>
-          <input type="text" name="adress" id="address" required />
-        </div>
-        <div class="form-example">
-          <label for="rating">Рейтинг точки: </label>
-          <input
-            type="number"
-            name="rating"
-            id="rating"
-            min="1"
-            max="5"
-            required
-          />
-        </div>
-        <button>Отправить</button>
-      </form>
-    </section>
-    <section class="4">
-      <div class="form-example">
-        <label for="nameFilt">Название точки: </label>
-        <input type="text" name="nameFilt" id="nameFilt" />
+  <body class="body">
+    <section class="content">
+      <div class="1"><h1>Точки интереса</h1></div>
+      <div class="2">
+        <form id="formInterest">
+          <div class="form-example">
+            <label for="name">Название точки: </label>
+            <input type="text" name="name" id="name" required />
+          </div>
+          <div class="form-example">
+            <label for="adress">Адрес точки: </label>
+            <input type="text" name="adress" id="address" required />
+          </div>
+          <div class="form-example">
+            <label for="rating">Рейтинг точки: </label>
+            <input
+              type="number"
+              name="rating"
+              id="rating"
+              min="1"
+              max="5"
+              required
+            />
+          </div>
+          <button>Отправить</button>
+        </form>
       </div>
-      <div class="form-example">
-        <label for="ratingFilt">Рейтинг точки: </label>
-        <select id="ratingFilt" name="ratingFilt">
-          <option value="all">Все</option>
-          <option value="5">5</option>
-          <option value="4">4</option>
-          <option value="3">3</option>
-          <option value="2">2</option>
-          <option value="1">1</option>
-        </select>
+      <div class="4">
+        <div class="form-example">
+          <label for="nameFilt">Название точки: </label>
+          <input type="text" name="nameFilt" id="nameFilt" />
+        </div>
+        <div class="form-example">
+          <label for="ratingFilt">Рейтинг точки: </label>
+          <select id="ratingFilt" name="ratingFilt">
+            <option value="all">Все</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+          </select>
+        </div>
       </div>
-    </section>
-    <section class="3" id="interestList">
-      <!-- <div>
+      <div class="3" id="interestList">
+        <!-- <div>
         <p>ID точки</p>
         <p>Название точки</p>
         <p>Адрес точки</p>
         <p>Рейтинг</p>
         <button>Избраное</button>
       </div> -->
+      </div>
     </section>
     <script src="/script/script.js"></script>
   </body>
