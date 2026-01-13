@@ -29,15 +29,21 @@ function renderList() {
   interestList.innerHTML = filterList
     .map(
       (item) => `
-        <div>
-        <p>ID точки: ${item.id}</p>
-        <p>Название точки: ${item.name}</p>
-        <p>Адрес точки: ${item.address}</p>
-        <p>Рейтинг: ${item.rating}</p>
-        <button>Избраное</button>
+        <div class="point-item">
+        <div><p>ID точки: <span class="resultText">${item.id}</span></p>
+        <p>Название точки: <span class="resultText">${item.name}</span></p>
+        <p>Адрес точки: <span class="resultText">${item.address}</span></p>
+        <p>Рейтинг: <span class="resultText">${item.rating}</span> ⭐</p></div>
+        <div><button class="favorite-btn">Избраное</button></div>
       </div>`
     )
     .join("");
+
+  if (filterList.length > 0) {
+    interestList.style.display = "block";
+  } else {
+    interestList.style.display = "none";
+  }
 }
 
 document.getElementById("nameFilt").addEventListener("keyup", renderList);

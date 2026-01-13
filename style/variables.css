@@ -1,0 +1,13 @@
+:root {
+  --bg-color: #e7edf3;
+  --h1-color: #1088df;
+  --bg-form: #f0f4f8;
+  --content-color: #1088df;
+  --btn-color: #1088df;
+  --btn-text-color: #fff;
+  --btn-color-hover: #2ea8ff;
+  --btn-color-active: #034d82;
+  --btn-text-color-hover: gray;
+  --input-bg: #fff;
+  --input-focus: #007bff;
+}
