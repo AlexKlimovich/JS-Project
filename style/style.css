@@ -7,6 +7,12 @@
 .body {
   background-color: var(--bg-color);
   display: flex;
+}
+
+.contentPosition {
+  display: flex;
+  margin-top: 50px;
+  width: 100%;
   justify-content: space-around;
 }
 
@@ -14,7 +20,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 50px;
 
   background-color: var(--bg-form);
   padding: 20px;
@@ -83,7 +88,9 @@
   margin-left: auto;
   margin-right: auto; */
   cursor: pointer;
-  transition: transform 0.1s ease, background-color 0.2s ease,
+  transition:
+    transform 0.1s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 .addBtn:hover {
@@ -165,7 +172,9 @@
   cursor: pointer;
   font-size: 14px;
   color: #495057;
-  transition: transform 0.1s ease, background-color 0.2s ease,
+  transition:
+    transform 0.1s ease,
+    background-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
@@ -177,4 +186,11 @@
   transform: translateY(2px);
   box-shadow: 0 2px 4px rgba(222, 255, 10, 0.1);
   background-color: yellow;
+}
+
+.mapStyle {
+  display: flex;
+  width: 600px;
+  height: 430px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }

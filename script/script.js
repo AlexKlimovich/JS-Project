@@ -1,4 +1,6 @@
 let mass = [];
+let myMap;
+let currentPlacemark = null;
 
 document
   .getElementById("formInterest")
@@ -35,7 +37,7 @@ function renderList() {
         <p>Адрес точки: <span class="resultText">${item.address}</span></p>
         <p>Рейтинг: <span class="resultText">${item.rating}</span> ⭐</p></div>
         <div><button class="favorite-btn">Избраное</button></div>
-      </div>`
+      </div>`,
     )
     .join("");
 
@@ -45,6 +47,13 @@ function renderList() {
     interestList.style.display = "none";
   }
 }
+
+ymaps.ready(function () {
+  myMap = new ymaps.Map("map", {
+    center: [53.904541, 27.561524],
+    zoom: 10,
+  });
+});
 
 document.getElementById("nameFilt").addEventListener("keyup", renderList);
 document.getElementById("ratingFilt").addEventListener("change", renderList);

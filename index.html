@@ -1,92 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <title>Точки интереса</title>
     <link rel="stylesheet" href="/style/variables.css" />
     <link rel="stylesheet" href="/style/style.css" />
+    <script
+      src="https://api-maps.yandex.ru/2.1/?apikey=93a6be68-80b7-48a8-b774-e26603e90d94&lang=ru_RU"
+      type="text/javascript"
+    ></script>
   </head>
   <body class="body">
-    <section class="headline">
-      <div class="textZagolovok"><h1>Места для посещений</h1></div>
-      <hr />
-      <div class="content">
-        <div class="addPoint">
-          <div><h2 class="secondHeadline">Добавить место</h2></div>
-          <form id="formInterest">
+    <section class="contentPosition">
+      <div class="headline">
+        <div class="textZagolovok"><h1>Места для посещений</h1></div>
+        <hr />
+        <div class="content">
+          <div class="addPoint">
+            <div><h2 class="secondHeadline">Добавить место</h2></div>
+            <form id="formInterest">
+              <div class="form-field">
+                <label for="name" class="textContent">Название места: </label
+                ><br />
+                <input
+                  type="text"
+                  class="fieldStyle"
+                  name="name"
+                  id="name"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label for="adress" class="textContent">Адрес места: </label
+                ><br />
+                <input
+                  type="text"
+                  name="adress"
+                  class="fieldStyle"
+                  id="address"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label for="coords" class="textContent"
+                  >Координаты места: </label
+                ><br />
+                <input
+                  type="text"
+                  name="coords"
+                  class="fieldStyle"
+                  id="coords"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label for="rating" class="textContent">Рейтинг места: </label>
+                <input
+                  id="rating"
+                  class="fieldStyleRating"
+                  name="ratingFilt"
+                  type="number"
+                  id="rating"
+                  name="rating"
+                  min="1"
+                  max="5"
+                  required
+                />
+              </div>
+              <button class="addBtn">Добавить</button>
+            </form>
+          </div>
+          <div class="searchPoint">
+            <div><h2 class="secondHeadline">Найти место</h2></div>
             <div class="form-field">
-              <label for="name" class="textContent">Название места: </label
+              <label for="nameFilt" class="textContent">Название места: </label
               ><br />
               <input
                 type="text"
+                name="nameFilt"
                 class="fieldStyle"
-                name="name"
-                id="name"
-                required
+                id="nameFilt"
               />
             </div>
             <div class="form-field">
-              <label for="adress" class="textContent">Адрес места: </label
-              ><br />
-              <input
-                type="text"
-                name="adress"
-                class="fieldStyle"
-                id="address"
-                required
-              />
+              <label for="ratingFilt" class="textContent"
+                >Рейтинг места:
+              </label>
+              <select id="ratingFilt" name="ratingFilt">
+                <option value="all">Все</option>
+                <option value="5">5 ⭐</option>
+                <option value="4">4 ⭐</option>
+                <option value="3">3 ⭐</option>
+                <option value="2">2 ⭐</option>
+                <option value="1">1 ⭐</option>
+              </select>
             </div>
-            <div class="form-field">
-              <label for="rating" class="textContent">Рейтинг места: </label>
-              <input
-                id="rating"
-                class="fieldStyleRating"
-                name="ratingFilt"
-                type="number"
-                id="rating"
-                name="rating"
-                min="1"
-                max="5"
-                required
-              />
-            </div>
-            <button class="addBtn">Добавить</button>
-          </form>
-        </div>
-        <div class="searchPoint">
-          <div><h2 class="secondHeadline">Найти место</h2></div>
-          <div class="form-field">
-            <label for="nameFilt" class="textContent">Название места: </label
-            ><br />
-            <input
-              type="text"
-              name="nameFilt"
-              class="fieldStyle"
-              id="nameFilt"
-            />
-          </div>
-          <div class="form-field">
-            <label for="ratingFilt" class="textContent">Рейтинг места: </label>
-            <select id="ratingFilt" name="ratingFilt">
-              <option value="all">Все</option>
-              <option value="5">5 ⭐</option>
-              <option value="4">4 ⭐</option>
-              <option value="3">3 ⭐</option>
-              <option value="2">2 ⭐</option>
-              <option value="1">1 ⭐</option>
-            </select>
           </div>
         </div>
-      </div>
-      <div class="resultField" id="interestList">
-        <!-- <div>
+        <div class="resultField" id="interestList">
+          <!-- <div>
         <p>ID точки</p>
         <p>Название точки</p>
         <p>Адрес точки</p>
         <p>Рейтинг</p>
         <button>Избраное</button>
       </div> -->
+        </div>
       </div>
+      <div id="map" class="mapStyle"></div>
     </section>
     <script src="/script/script.js"></script>
   </body>
