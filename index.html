@@ -5,13 +5,24 @@
     <title>Точки интереса</title>
     <link rel="stylesheet" href="/style/variables.css" />
     <link rel="stylesheet" href="/style/style.css" />
-    <script
-      src="https://api-maps.yandex.ru/2.1/?apikey=93a6be68-80b7-48a8-b774-e26603e90d94&lang=ru_RU"
-      type="text/javascript"
-    ></script>
   </head>
   <body class="body">
-    <section class="contentPosition">
+    <section id="apiSection" class="sectionApi">
+      <div class="contentPositionApi headlineApi">
+        <div><h2 class="headlineApiKey">Введите API Key</h2></div>
+        <div class="sectionApiInput">
+          <input
+            type="text"
+            name="apikey"
+            class="fieldStyleApi"
+            id="apikey"
+            required
+          /><br />
+          <button id="submitapi" class="btnApi">Отправить</button>
+        </div>
+      </div>
+    </section>
+    <section class="contentPosition hidden" id="contentSection">
       <div class="headline">
         <div class="textZagolovok"><h1>Места для посещений</h1></div>
         <hr />
@@ -109,6 +120,7 @@
       </div>
       <div id="map" class="mapStyle"></div>
     </section>
+
     <script src="/script/script.js"></script>
   </body>
 </html>
