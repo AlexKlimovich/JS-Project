@@ -5,11 +5,43 @@
     <title>Точки интереса</title>
     <link rel="stylesheet" href="/style/variables.css" />
     <link rel="stylesheet" href="/style/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   </head>
   <body class="body">
     <section id="apiSection" class="sectionApi">
       <div class="contentPositionApi headlineApi">
-        <div><h2 class="headlineApiKey">Введите API Key</h2></div>
+        <form id="formApi" class="apiFormStyle">
+          <div class="form-field">
+            <label for="name" class="headlineApiKey"
+              >Введите Yandex API Key</label
+            >
+            <input
+              type="text"
+              name="apikey"
+              class="fieldStyleApi"
+              id="apikey"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <label for="name" class="headlineApiKey"
+              >Введите WeatherMap API Key</label
+            >
+            <input
+              type="text"
+              class="fieldStyleApi"
+              name="weatherapikey"
+              id="weatherapikey"
+              required
+            />
+          </div>
+          <button id="submitapi" class="btnApi" type="submit">Отправить</button>
+        </form>
+        <!-- <div><h2 class="headlineApiKey">Введите API Key</h2></div>
         <div class="sectionApiInput">
           <input
             type="text"
@@ -19,7 +51,7 @@
             required
           /><br />
           <button id="submitapi" class="btnApi">Отправить</button>
-        </div>
+        </div> -->
       </div>
     </section>
     <section class="contentPosition hidden" id="contentSection">
@@ -78,7 +110,7 @@
                   required
                 />
               </div>
-              <button class="addBtn">Добавить</button>
+              <button class="addBtn" type="submit">Добавить</button>
             </form>
           </div>
           <div class="searchPoint">
@@ -119,6 +151,7 @@
         </div>
       </div>
       <div id="map" class="mapStyle"></div>
+      <div id="weather-map" class="weatherMapStyle"></div>
     </section>
 
     <script src="/script/script.js"></script>
