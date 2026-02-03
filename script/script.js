@@ -1,10 +1,25 @@
 let mass = JSON.parse(localStorage.getItem("massPoint")) || [];
+let markerMass = [];
+let coordinate;
+let weatherApiKey;
+
+navigator.geolocation.getCurrentPosition(
+  (position) => {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    coordinate = [lat, lon];
+    console.log(lat, lon);
+  },
+  (error) => {
+    console.error(error);
+  },
+);
 
 document.getElementById("formApi").addEventListener("submit", function (e) {
   e.preventDefault();
   const scriptmap = document.createElement("script");
   const apikey = document.getElementById("apikey").value.trim();
-  const weatherApiKey = document.getElementById("weatherapikey").value.trim();
+  weatherApiKey = document.getElementById("weatherapikey").value.trim();
 
   if (!apikey && !weatherApiKey) {
     alert("Поля не заполнены! Введите API-ключи.");
@@ -19,18 +34,21 @@ document.getElementById("formApi").addEventListener("submit", function (e) {
     document.getElementById("weatherapikey").focus();
     return;
   }
-  scriptmap.src = `https://api-maps.yandex.ru/2.1/?apikey=  ${apikey}&lang=ru_RU`;
-  scriptmap.onload = () => {
-    const mapjs = document.createElement("script");
-    mapjs.src = "/script/map.js";
-    document.head.appendChild(mapjs);
-    document.getElementById("contentSection").classList.remove("hidden");
-    document.getElementById("apiSection").classList.add("hidden");
-    renderList();
-  };
-  document.head.appendChild(scriptmap);
 
   initWeatherMap(weatherApiKey);
+  scriptmap.src = `https://api-maps.yandex.ru/2.1/?apikey=${apikey}&lang=ru_RU`;
+  scriptmap.onload = () => {
+    if (!window.mapJsLoaded) {
+      const mapjs = document.createElement("script");
+      mapjs.src = "/script/map.js";
+      document.head.appendChild(mapjs);
+      document.getElementById("contentSection").classList.remove("hidden");
+      document.getElementById("apiSection").classList.add("hidden");
+      renderList();
+      window.mapJsLoaded = true;
+    }
+  };
+  document.head.appendChild(scriptmap);
 });
 
 function initWeatherMap(apiKey) {
@@ -38,21 +56,24 @@ function initWeatherMap(apiKey) {
     window.weatherMapInstance.remove();
   }
 
-  const map = L.map("weather-map").setView([55.75, 37.62], 5);
+  const map = L.map("weather-map").setView(coordinate, 10);
   window.weatherMapInstance = map;
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright  ">OpenStreetMap</a> contributors',
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
   L.tileLayer(
-    `https://tile.openweathermap.org/map/temp_new/  {z}/{x}/{y}.png?appid=${apiKey}`,
+    `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
     {
       attribution:
-        'Weather from <a href="https://openweathermap.org/  ">OpenWeatherMap</a>',
+        'Weather from <a href="https://openweathermap.org/">OpenWeatherMap</a>',
     },
   ).addTo(map);
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 1000);
 }
 
 document
@@ -108,8 +129,10 @@ function renderList() {
 }
 
 document.getElementById("interestList").addEventListener("click", function (e) {
+  const object = e.target.closest(".point-item");
+  if (!object) return;
+  const id = object.dataset.id;
   if (e.target.classList.contains("trashBtn")) {
-    const id = e.target.dataset.id;
     mass = mass.filter((item) => item.id !== id);
     localStorage.setItem("massPoint", JSON.stringify(mass));
     renderList();
@@ -121,6 +144,39 @@ document.getElementById("interestList").addEventListener("click", function (e) {
     e.target.classList.contains("trashBtn")
   ) {
     return;
+  }
+
+  if (markerMass.filter((item) => item.id === id).length === 0) {
+    const item = mass.find((item) => item.id === id);
+    var coords = item.coords.split(",").map(Number);
+    var placemark = new ymaps.Placemark(coords, {
+      balloonContent: item.name,
+    });
+    fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${coords[0]}&lon=${coords[1]}&appid=${weatherApiKey}&units=metric&lang=ru`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        const description = data.weather[0].description;
+        const capitalizedDescription =
+          description.charAt(0).toUpperCase() + description.slice(1);
+        const weatherField = document.getElementById("weather");
+        weatherField.innerHTML = `
+  <p><span class="weatherFieldStyle">Температура:</span> ${data.main.temp}</p>
+  <br>
+  <p><span class="weatherFieldStyle">Описание:</span><br> ${capitalizedDescription}</p>
+`;
+      })
+      .catch((err) => console.error(err));
+    window.weatherMapInstance.flyTo(coords, 18);
+
+    myMap.geoObjects.add(placemark);
+    markerMass.push({ id, placemark });
+  } else {
+    myMap.geoObjects.remove(
+      markerMass.find((item) => item.id === id).placemark,
+    );
+    markerMass = markerMass.filter((item) => item.id !== id);
   }
 
   const pointItem = e.target.closest(".point-item");
