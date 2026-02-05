@@ -139,8 +139,8 @@
                 <option value="1">1 ⭐</option>
               </select>
             </div>
-            <div><h2 class="secondHeadline">Погода</h2></div>
-            <div id="weather"></div>
+            <!-- <div><h2 class="secondHeadline">Погода</h2></div> -->
+            <!-- <div id="weather-info"></div> -->
           </div>
         </div>
         <div class="resultField" id="interestList">
@@ -154,7 +154,17 @@
         </div>
       </div>
       <div id="map" class="mapStyle"></div>
-      <div id="weather-map" class="weatherMapStyle"></div>
+      <div id="weather-widget">
+        <div id="current-weather">
+          <div id="weather-icon"></div>
+          <div>
+            <div id="city-name">Выберите точку</div>
+            <div id="temperature"></div>
+            <div id="description"></div>
+          </div>
+        </div>
+        <div id="forecast"></div>
+      </div>
     </section>
 
     <script src="/script/script.js"></script>

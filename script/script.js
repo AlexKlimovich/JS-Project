@@ -1,6 +1,6 @@
 let mass = JSON.parse(localStorage.getItem("massPoint")) || [];
 let markerMass = [];
-let coordinate;
+let coordinate = [53.9006, 27.559];
 let weatherApiKey;
 
 navigator.geolocation.getCurrentPosition(
@@ -35,7 +35,7 @@ document.getElementById("formApi").addEventListener("submit", function (e) {
     return;
   }
 
-  initWeatherMap(weatherApiKey);
+  // initWeatherMap(weatherApiKey);
   scriptmap.src = `https://api-maps.yandex.ru/2.1/?apikey=${apikey}&lang=ru_RU`;
   scriptmap.onload = () => {
     if (!window.mapJsLoaded) {
@@ -51,30 +51,30 @@ document.getElementById("formApi").addEventListener("submit", function (e) {
   document.head.appendChild(scriptmap);
 });
 
-function initWeatherMap(apiKey) {
-  if (window.weatherMapInstance) {
-    window.weatherMapInstance.remove();
-  }
+// function initWeatherMap(apiKey) {
+//   if (window.weatherMapInstance) {
+//     window.weatherMapInstance.remove();
+//   }
 
-  const map = L.map("weather-map").setView(coordinate, 10);
-  window.weatherMapInstance = map;
+//   const map = L.map("weather-map").setView(coordinate, 10);
+//   window.weatherMapInstance = map;
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
+//   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+//     attribution:
+//       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+//   }).addTo(map);
 
-  L.tileLayer(
-    `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
-    {
-      attribution:
-        'Weather from <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-    },
-  ).addTo(map);
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 1000);
-}
+//   L.tileLayer(
+//     `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`,
+//     {
+//       attribution:
+//         'Weather from <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+//     },
+//   ).addTo(map);
+//   setTimeout(() => {
+//     map.invalidateSize();
+//   }, 1000);
+// }
 
 document
   .getElementById("formInterest")
@@ -132,6 +132,7 @@ document.getElementById("interestList").addEventListener("click", function (e) {
   const object = e.target.closest(".point-item");
   if (!object) return;
   const id = object.dataset.id;
+
   if (e.target.classList.contains("trashBtn")) {
     mass = mass.filter((item) => item.id !== id);
     localStorage.setItem("massPoint", JSON.stringify(mass));
@@ -146,29 +147,85 @@ document.getElementById("interestList").addEventListener("click", function (e) {
     return;
   }
 
+  const pointItem = e.target.closest(".point-item");
+  if (!pointItem) return;
+
+  const item = mass.find((i) => i.id === id);
+  if (!item) return;
+
+  const [lat, lon] = item.coords.split(",").map(Number);
+
+  // Погода
+  const currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
+
+  // Текущая погода
+  fetch(currentUrl)
+    .then((res) => res.json())
+    .then((data) => {
+      document.getElementById("city-name").textContent = data.name;
+      document.getElementById("temperature").textContent =
+        Math.round(data.main.temp) + "°";
+      document.getElementById("description").textContent =
+        data.weather[0].description;
+
+      const iconCode = data.weather[0].icon;
+      document.getElementById("weather-icon").innerHTML = `
+        <img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Погода">
+      `;
+    })
+    .catch((err) => {
+      console.error("Ошибка текущей погоды:", err);
+      document.getElementById("city-name").textContent = "Ошибка загрузки";
+    });
+
+  // Прогноз на 5 дней
+  fetch(forecastUrl)
+    .then((res) => res.json())
+    .then((data) => {
+      const dailyForecast = [];
+      const seenDates = new Set();
+
+      for (let item of data.list) {
+        const date = new Date(item.dt * 1000);
+        const day = date.getDate();
+        if (!seenDates.has(day)) {
+          seenDates.add(day);
+          dailyForecast.push({
+            day: date.toLocaleDateString("ru", { weekday: "short" }),
+            temp: Math.round(item.main.temp),
+            icon: item.weather[0].icon,
+          });
+          if (dailyForecast.length === 5) break;
+        }
+      }
+
+      const forecastHtml = dailyForecast
+        .map(
+          (day) => `
+        <div style="text-align: center;">
+          <div style="font-size: 14px; color: #e0e0e0; margin-bottom: 8px;">${day.day}</div>
+          <img src="https://openweathermap.org/img/wn/${day.icon}.png" alt="Погода" style="width: 40px; height: 40px;">
+          <div style="font-size: 16px; font-weight: bold; color: #e0e0e0; margin-top: 4px;">${day.temp}°</div>
+        </div>
+      `,
+        )
+        .join("");
+
+      document.getElementById("forecast").innerHTML = forecastHtml;
+    })
+    .catch((err) => {
+      console.error("Ошибка прогноза:", err);
+      document.getElementById("forecast").innerHTML =
+        "<div>Не удалось загрузить прогноз</div>";
+    });
+
+  //Точки на карте
   if (markerMass.filter((item) => item.id === id).length === 0) {
-    const item = mass.find((item) => item.id === id);
     var coords = item.coords.split(",").map(Number);
     var placemark = new ymaps.Placemark(coords, {
       balloonContent: item.name,
     });
-    fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${coords[0]}&lon=${coords[1]}&appid=${weatherApiKey}&units=metric&lang=ru`,
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const description = data.weather[0].description;
-        const capitalizedDescription =
-          description.charAt(0).toUpperCase() + description.slice(1);
-        const weatherField = document.getElementById("weather");
-        weatherField.innerHTML = `
-  <p><span class="weatherFieldStyle">Температура:</span> ${data.main.temp}</p>
-  <br>
-  <p><span class="weatherFieldStyle">Описание:</span><br> ${capitalizedDescription}</p>
-`;
-      })
-      .catch((err) => console.error(err));
-    window.weatherMapInstance.flyTo(coords, 18);
 
     myMap.geoObjects.add(placemark);
     markerMass.push({ id, placemark });
@@ -179,10 +236,7 @@ document.getElementById("interestList").addEventListener("click", function (e) {
     markerMass = markerMass.filter((item) => item.id !== id);
   }
 
-  const pointItem = e.target.closest(".point-item");
-  if (pointItem) {
-    pointItem.classList.toggle("selected");
-  }
+  pointItem.classList.toggle("selected");
 });
 
 document.getElementById("nameFilt").addEventListener("keyup", renderList);
