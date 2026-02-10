@@ -2,6 +2,7 @@ let mass = JSON.parse(localStorage.getItem("massPoint")) || [];
 let markerMass = [];
 let coordinate = [53.9006, 27.559];
 let weatherApiKey;
+let showOnlyFavourites = false;
 
 navigator.geolocation.getCurrentPosition(
   (position) => {
@@ -86,6 +87,7 @@ document
       address: document.getElementById("address").value,
       coords: document.getElementById("coords").value,
       rating: parseInt(document.getElementById("rating").value),
+      favorite: false,
     };
     mass.unshift(interest);
     localStorage.setItem("massPoint", JSON.stringify(mass));
@@ -100,7 +102,9 @@ function renderList() {
     const matchName = item.name.toLowerCase().includes(filterName);
     const matchRating =
       filterRating === "all" || item.rating === parseInt(filterRating);
-    return matchName && matchRating;
+    const matchFavorite =
+      item.favorite === showOnlyFavourites || !showOnlyFavourites;
+    return matchName && matchRating && matchFavorite;
   });
   const interestList = document.getElementById("interestList");
 
@@ -115,7 +119,7 @@ function renderList() {
           <p>Координаты: <span class="resultText">${item.coords}</span></p>
           <p>Рейтинг: <span class="resultText">${item.rating}</span> ⭐</p>
         </div>
-        <button class="favorite-btn" title="В избранное">Избраное</button>
+        <button class="favorite-btn ${item.favorite ? "selected" : ""}" title="В избранное">Избраное</button>
         <button class="trashBtn" title="Удалить" data-id="${item.id}"></button>
       </div>`,
     )
@@ -128,115 +132,65 @@ function renderList() {
   }
 }
 
+document.getElementById("favBtn").addEventListener("click", function () {
+  showOnlyFavourites = !showOnlyFavourites;
+  this.textContent = showOnlyFavourites ? "Показать все" : "Показать избранное";
+  renderList();
+});
+
 document.getElementById("interestList").addEventListener("click", function (e) {
   const object = e.target.closest(".point-item");
   if (!object) return;
   const id = object.dataset.id;
-
-  if (e.target.classList.contains("trashBtn")) {
-    mass = mass.filter((item) => item.id !== id);
-    localStorage.setItem("massPoint", JSON.stringify(mass));
-    renderList();
-    return;
-  }
-
-  if (
-    e.target.classList.contains("favorite-btn") ||
-    e.target.classList.contains("trashBtn")
-  ) {
-    return;
-  }
-
-  const pointItem = e.target.closest(".point-item");
-  if (!pointItem) return;
 
   const item = mass.find((i) => i.id === id);
   if (!item) return;
 
   const [lat, lon] = item.coords.split(",").map(Number);
 
-  // Погода
-  const currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
+  if (e.target.classList.contains("trashBtn")) {
+    mass = mass.filter((item) => item.id !== id);
+    localStorage.setItem("massPoint", JSON.stringify(mass));
+    renderList();
 
-  // Текущая погода
-  fetch(currentUrl)
-    .then((res) => res.json())
-    .then((data) => {
-      document.getElementById("city-name").textContent = data.name;
-      document.getElementById("temperature").textContent =
-        Math.round(data.main.temp) + "°";
-      document.getElementById("description").textContent =
-        data.weather[0].description;
-
-      const iconCode = data.weather[0].icon;
-      document.getElementById("weather-icon").innerHTML = `
-        <img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Погода">
-      `;
-    })
-    .catch((err) => {
-      console.error("Ошибка текущей погоды:", err);
-      document.getElementById("city-name").textContent = "Ошибка загрузки";
-    });
-
-  // Прогноз на 5 дней
-  fetch(forecastUrl)
-    .then((res) => res.json())
-    .then((data) => {
-      const dailyForecast = [];
-      const seenDates = new Set();
-
-      for (let item of data.list) {
-        const date = new Date(item.dt * 1000);
-        const day = date.getDate();
-        if (!seenDates.has(day)) {
-          seenDates.add(day);
-          dailyForecast.push({
-            day: date.toLocaleDateString("ru", { weekday: "short" }),
-            temp: Math.round(item.main.temp),
-            icon: item.weather[0].icon,
-          });
-          if (dailyForecast.length === 5) break;
-        }
-      }
-
-      const forecastHtml = dailyForecast
-        .map(
-          (day) => `
-        <div style="text-align: center;">
-          <div style="font-size: 14px; color: #e0e0e0; margin-bottom: 8px;">${day.day}</div>
-          <img src="https://openweathermap.org/img/wn/${day.icon}.png" alt="Погода" style="width: 40px; height: 40px;">
-          <div style="font-size: 16px; font-weight: bold; color: #e0e0e0; margin-top: 4px;">${day.temp}°</div>
-        </div>
-      `,
-        )
-        .join("");
-
-      document.getElementById("forecast").innerHTML = forecastHtml;
-    })
-    .catch((err) => {
-      console.error("Ошибка прогноза:", err);
-      document.getElementById("forecast").innerHTML =
-        "<div>Не удалось загрузить прогноз</div>";
-    });
-
-  //Точки на карте
-  if (markerMass.filter((item) => item.id === id).length === 0) {
-    var coords = item.coords.split(",").map(Number);
-    var placemark = new ymaps.Placemark(coords, {
-      balloonContent: item.name,
-    });
-
-    myMap.geoObjects.add(placemark);
-    markerMass.push({ id, placemark });
+    let markerRemove = markerMass.find((item) => item.id === id);
+    if (markerRemove) {
+      myMap.geoObjects.remove(markerRemove.placemark);
+      markerMass = markerMass.filter((item) => item.id !== id);
+    }
+  } else if (e.target.classList.contains("favorite-btn")) {
+    item.favorite = !item.favorite;
+    localStorage.setItem("massPoint", JSON.stringify(mass));
+    e.target.classList.toggle("selected");
+    return;
   } else {
-    myMap.geoObjects.remove(
-      markerMass.find((item) => item.id === id).placemark,
-    );
-    markerMass = markerMass.filter((item) => item.id !== id);
+    //Точки на карте
+    if (markerMass.filter((item) => item.id === id).length === 0) {
+      var coords = item.coords.split(",").map(Number);
+      var placemark = new ymaps.Placemark(coords, {
+        balloonContent: item.name,
+      });
+
+      myMap.geoObjects.add(placemark);
+      markerMass.push({ id, placemark });
+    } else {
+      myMap.geoObjects.remove(
+        markerMass.find((item) => item.id === id).placemark,
+      );
+      markerMass = markerMass.filter((item) => item.id !== id);
+    }
   }
 
-  pointItem.classList.toggle("selected");
+  //Очистка погоды при снятии точек
+
+  if (markerMass.length === 0) {
+    Weather.resetWeather();
+  } else {
+    let weather = new Weather(lat, lon, weatherApiKey);
+    weather.setWeather();
+  }
+
+  object.classList.toggle("selected");
 });
 
 document.getElementById("nameFilt").addEventListener("keyup", renderList);

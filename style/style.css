@@ -168,6 +168,30 @@
   background-color: var(--btn-color-active);
 }
 
+.favBtn {
+  background-color: gold;
+  color: var(--text-color);
+  padding: 10px 10px;
+  border-radius: 5px;
+  border: none;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition:
+    transform 0.1s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.favBtn:hover {
+  color: var(--text-color);
+  background-color: rgb(245, 245, 75);
+}
+
+.favBtn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background-color: yellow;
+}
+
 .btnApi {
   background-color: var(--btn-color);
   color: var(--btn-text-color);
@@ -321,10 +345,16 @@
 }
 
 .favorite-btn:hover {
-  background-color: yellow;
+  background-color: rgb(245, 245, 75);
 }
 
-.favorite-btn:active {
+/* .favorite-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(222, 255, 10, 0.2);
+} */
+
+.favorite-btn.selected {
+  background-color: yellow;
   transform: translateY(1px);
   box-shadow: 0 2px 4px rgba(222, 255, 10, 0.2);
 }
