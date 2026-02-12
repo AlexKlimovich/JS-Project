@@ -3,6 +3,10 @@ class Weather {
     this.currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
     this.forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
   }
+
+  // проверка гонки состояний
+  // множественный вызов
+  // возможно перевызвать ,если случилась ошибка
   setWeather() {
     fetch(this.currentUrl)
       .then((res) => res.json())
@@ -64,6 +68,7 @@ class Weather {
           "<div>Не удалось загрузить прогноз</div>";
       });
   }
+
   static resetWeather() {
     document.getElementById("city-name").textContent = "Выберите точку";
     document.getElementById("temperature").textContent = "";

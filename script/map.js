@@ -1,5 +1,4 @@
 let myMap;
-
 ymaps.ready(function () {
   myMap = new ymaps.Map("map", {
     center: coordinate,
