@@ -1,29 +1,29 @@
-export const initMap = (coordinate) => {
-  let myMap;
+export const initMap = (coordinate) =>
+  new Promise((resolve) => {
+    window.ymaps.ready(function () {
+      const myMap = new window.ymaps.Map('map', {
+        center: coordinate,
+        zoom: 10,
+      });
 
-  window.ymaps.ready(function () {
-    myMap = new window.ymaps.Map('map', {
-      center: coordinate,
-      zoom: 10,
-    });
+      myMap.events.add('mousedown', function (e) {
+        const coords = e.get('coords');
 
-    myMap.events.add('mousedown', function (e) {
-      const coords = e.get('coords');
-
-      setTimeout(() => {
-        window.ymaps
-          .geocode(coords)
-          .then(function (res) {
-            const address = res.geoObjects.get(0).getAddressLine();
-            console.log('Координаты:', coords);
-            console.log('Адрес:', address);
-            document.getElementById('address').value = address;
-            document.getElementById('coords').value = coords;
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      }, 100);
+        setTimeout(() => {
+          window.ymaps
+            .geocode(coords)
+            .then(function (res) {
+              const address = res.geoObjects.get(0).getAddressLine();
+              console.log('Координаты:', coords);
+              console.log('Адрес:', address);
+              document.getElementById('address').value = address;
+              document.getElementById('coords').value = coords;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        }, 100);
+      });
+      resolve(myMap);
     });
   });
-};

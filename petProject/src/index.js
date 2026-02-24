@@ -1,7 +1,7 @@
 import './style/variables.css';
 import './style/style.css';
 import './map.js';
-import './weatherClass.js';
+import { Weather } from './weatherClass.js';
 import { initMap } from './map.js';
 
 let mass = JSON.parse(localStorage.getItem('massPoint')) || [];
@@ -10,6 +10,7 @@ let coordinate = [53.9006, 27.559];
 let weatherApiKey;
 let showOnlyFavourites = false;
 let myMap;
+let selectedPointId = null;
 
 navigator.geolocation.getCurrentPosition(
   (position) => {
@@ -53,7 +54,7 @@ document.getElementById('formApi').addEventListener('submit', function (e) {
       document.getElementById('contentSection').classList.remove('hidden');
       document.getElementById('apiSection').classList.add('hidden');
       renderList();
-      initMap(coordinate);
+      initMap(coordinate).then((result) => (myMap = result));
       window.mapJsLoaded = true;
     }
   };
@@ -89,6 +90,13 @@ document
   .getElementById('formInterest')
   .addEventListener('submit', function (e) {
     e.preventDefault();
+
+    // const savedNameFilter = document.getElementById('nameFilt').value;
+    // const savedRatingFilter = document.getElementById('ratingFilt').value;
+
+    document.getElementById('nameFilt').value = '';
+    document.getElementById('ratingFilt').value = 'all';
+
     const interest = {
       id: 'interest_' + Date.now(),
       name: document.getElementById('name').value,
@@ -101,6 +109,9 @@ document
     localStorage.setItem('massPoint', JSON.stringify(mass));
     renderList();
     this.reset();
+
+    // document.getElementById('nameFilt').value = savedNameFilter;
+    // document.getElementById('ratingFilt').value = savedRatingFilter;
   });
 
 function renderList() {
@@ -156,53 +167,83 @@ document.getElementById('interestList').addEventListener('click', function (e) {
 
   const [lat, lon] = item.coords.split(',').map(Number);
 
+  // Удаление
   if (e.target.classList.contains('trashBtn')) {
     mass = mass.filter((item) => item.id !== id);
     localStorage.setItem('massPoint', JSON.stringify(mass));
     renderList();
 
-    let markerRemove = markerMass.find((item) => item.id === id);
-    if (markerRemove) {
-      myMap.geoObjects.remove(markerRemove.placemark);
-      markerMass = markerMass.filter((item) => item.id !== id);
+    const markerToRemove = markerMass.find((m) => m.id === id);
+    if (markerToRemove) {
+      myMap.geoObjects.remove(markerToRemove.placemark);
+      markerMass = markerMass.filter((m) => m.id !== id);
     }
-  } else if (e.target.classList.contains('favorite-btn')) {
+
+    if (selectedPointId === id) {
+      selectedPointId = null;
+      Weather.resetWeather();
+    }
+    return;
+  }
+
+  // Избранное
+  if (e.target.classList.contains('favorite-btn')) {
     item.favorite = !item.favorite;
     localStorage.setItem('massPoint', JSON.stringify(mass));
     e.target.classList.toggle('selected');
     return;
-  } else {
-    if (!myMap) {
-      alert('Карта ещё не загружена. Подождите...');
-      return;
-    }
-    //Точки на карте
-    if (markerMass.filter((item) => item.id === id).length === 0) {
-      var coords = item.coords.split(',').map(Number);
-      var placemark = new ymaps.Placemark(coords, {
-        balloonContent: item.name,
-      });
-
-      myMap.geoObjects.add(placemark);
-      markerMass.push({ id, placemark });
-    } else {
-      myMap.geoObjects.remove(
-        markerMass.find((item) => item.id === id).placemark,
-      );
-      markerMass = markerMass.filter((item) => item.id !== id);
-    }
   }
 
-  //Очистка погоды при снятии точек
+  if (selectedPointId === id) {
+    // Повторное нажатие на ту же точку → снимает выделение
+    object.classList.remove('selected');
+    selectedPointId = null;
 
-  if (markerMass.length === 0) {
+    // Удаление маркера
+    const markerToRemove = markerMass.find((m) => m.id === id);
+    if (markerToRemove) {
+      myMap.geoObjects.remove(markerToRemove.placemark);
+      markerMass = markerMass.filter((m) => m.id !== id);
+    }
+
+    // Сбрасываем погоду
     Weather.resetWeather();
   } else {
-    let weather = new Weather(lat, lon, weatherApiKey);
+    // Выбираем новую точку
+
+    // Снимаем выделение с предыдущей
+    if (selectedPointId) {
+      const prevEl = document.querySelector(
+        `.point-item[data-id="${selectedPointId}"]`,
+      );
+      if (prevEl) prevEl.classList.remove('selected');
+
+      const prevMarker = markerMass.find((m) => m.id === selectedPointId);
+      if (prevMarker) {
+        myMap.geoObjects.remove(prevMarker.placemark);
+        markerMass = markerMass.filter((m) => m.id !== selectedPointId);
+      }
+    }
+
+    // Выделяем новую
+    selectedPointId = id;
+    object.classList.add('selected');
+
+    // Добавление маркера
+    if (myMap) {
+      const coords = item.coords.split(',').map(Number);
+      const placemark = new ymaps.Placemark(coords, {
+        balloonContent: item.name,
+      });
+      myMap.geoObjects.add(placemark);
+      markerMass.push({ id, placemark });
+      myMap.panTo(coords, { duration: 500 });
+    }
+
+    // Обновление погоды
+    const weather = new Weather(lat, lon, weatherApiKey);
     weather.setWeather();
   }
-
-  object.classList.toggle('selected');
 });
 
 document.getElementById('nameFilt').addEventListener('keyup', renderList);
