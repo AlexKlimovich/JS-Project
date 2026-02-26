@@ -1,13 +1,15 @@
-// @ts-check
 import { defineConfig } from '@rspack/cli';
-import { rspack } from '@rspack/core';
+import { rspack, type SwcLoaderOptions } from '@rspack/core';
 
 // Target browsers, see: https://github.com/browserslist/browserslist
 const targets = ['last 2 versions', '> 0.2%', 'not dead', 'Firefox ESR'];
 
 export default defineConfig({
   entry: {
-    main: './src/index.js',
+    main: './src/index.ts',
+  },
+  resolve: {
+    extensions: ['...', '.ts'],
   },
   module: {
     rules: [
@@ -20,7 +22,6 @@ export default defineConfig({
         use: [
           {
             loader: 'builtin:swc-loader',
-            /** @type {import('@rspack/core').SwcLoaderOptions} */
             options: {
               jsc: {
                 parser: {
@@ -28,7 +29,23 @@ export default defineConfig({
                 },
               },
               env: { targets },
-            },
+            } satisfies SwcLoaderOptions,
+          },
+        ],
+      },
+      {
+        test: /\.ts$/,
+        use: [
+          {
+            loader: 'builtin:swc-loader',
+            options: {
+              jsc: {
+                parser: {
+                  syntax: 'typescript',
+                },
+              },
+              env: { targets },
+            } satisfies SwcLoaderOptions,
           },
         ],
       },

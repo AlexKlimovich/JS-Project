@@ -1,26 +1,42 @@
 export class Weather {
-  constructor(lat, lon, weatherApiKey) {
+  private currentUrl: string;
+  private forecastUrl: string;
+
+  private static cityNameEl: HTMLElement | null =
+    document.getElementById('city-name');
+  private static tempEl: HTMLElement | null =
+    document.getElementById('temperature');
+  private static descEl: HTMLElement | null =
+    document.getElementById('description');
+  private static iconEl: HTMLElement | null =
+    document.getElementById('weather-icon');
+  private static forecastEl: HTMLElement | null =
+    document.getElementById('forecast');
+
+  constructor(lat: number, lon: number, weatherApiKey: string) {
     this.currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
     this.forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric&lang=ru`;
   }
-  setWeather() {
+  async setWeather(): Promise<void> {
     fetch(this.currentUrl)
       .then((res) => res.json())
       .then((data) => {
-        document.getElementById('city-name').textContent = data.name;
-        document.getElementById('temperature').textContent =
-          Math.round(data.main.temp) + '°';
-        document.getElementById('description').textContent =
-          data.weather[0].description;
+        if (Weather.cityNameEl) Weather.cityNameEl.textContent = data.name;
+        if (Weather.tempEl)
+          Weather.tempEl.textContent = Math.round(data.main.temp) + '°';
+        if (Weather.descEl)
+          Weather.descEl.textContent = data.weather[0].description;
 
         const iconCode = data.weather[0].icon;
-        document.getElementById('weather-icon').innerHTML = `
+        if (Weather.iconEl)
+          Weather.iconEl.innerHTML = `
         <img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="Погода">
       `;
       })
       .catch((err) => {
         console.error('Ошибка текущей погоды:', err);
-        document.getElementById('city-name').textContent = 'Ошибка загрузки';
+        if (Weather.cityNameEl)
+          Weather.cityNameEl.textContent = 'Ошибка загрузки';
       });
 
     // Прогноз на 5 дней
@@ -56,19 +72,20 @@ export class Weather {
           )
           .join('');
 
-        document.getElementById('forecast').innerHTML = forecastHtml;
+        if (Weather.forecastEl) Weather.forecastEl.innerHTML = forecastHtml;
       })
       .catch((err) => {
         console.error('Ошибка прогноза:', err);
-        document.getElementById('forecast').innerHTML =
-          '<div>Не удалось загрузить прогноз</div>';
+        if (Weather.forecastEl)
+          Weather.forecastEl.innerHTML =
+            '<div>Не удалось загрузить прогноз</div>';
       });
   }
-  static resetWeather() {
-    document.getElementById('city-name').textContent = 'Выберите точку';
-    document.getElementById('temperature').textContent = '';
-    document.getElementById('description').textContent = '';
-    document.getElementById('weather-icon').innerHTML = '';
-    document.getElementById('forecast').innerHTML = '';
+  static resetWeather(): void {
+    if (this.cityNameEl) this.cityNameEl.textContent = 'Выберите точку';
+    if (this.tempEl) this.tempEl.textContent = '';
+    if (this.descEl) this.descEl.textContent = '';
+    if (this.iconEl) this.iconEl.innerHTML = '';
+    if (this.forecastEl) this.forecastEl.innerHTML = '';
   }
 }
