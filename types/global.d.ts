@@ -1,5 +1,4 @@
 interface Window {
-  ymaps: any;
   mapJsLoaded?: boolean;
 }
 

@@ -14,11 +14,11 @@ const ratingFilt = document.getElementById(
 ) as HTMLInputElement | null;
 
 let mass: Point[] = JSON.parse(localStorage.getItem('massPoint') || '[]');
-let markerMass: any[] = [];
+let markerMass: { id: string; placemark: ymaps.Placemark }[] = [];
 let coordinate: [number, number] = [53.9006, 27.559];
 let weatherApiKey: string;
 let showOnlyFavourites: boolean = false;
-let myMap: any;
+let myMap: ymaps.Map;
 // let selectedPointId: string | null = null;
 let selectedPointId: string | undefined;
 
@@ -214,7 +214,9 @@ interestList?.addEventListener('click', function (e) {
   const target = e.target as HTMLElement | null;
   const object = target?.closest('.point-item') as HTMLElement | null;
   if (!object) return;
+
   const id = object.dataset.id;
+  if (!id) return;
 
   const item = mass.find((i) => i.id === id);
   if (!item) return;

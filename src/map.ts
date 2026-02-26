@@ -1,4 +1,4 @@
-export const initMap = (coordinate: [number, number]) =>
+export const initMap = (coordinate: [number, number]): Promise<ymaps.Map> =>
   new Promise((resolve) => {
     window.ymaps.ready(function () {
       const myMap = new window.ymaps.Map('map', {
